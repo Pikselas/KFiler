@@ -3,7 +3,11 @@ NetworkBuilder::Starter NetworkBuilder::Starter::Stuart;
 NetworkBuilder::Starter::Starter()
 {
 	WSADATA wdt;
-	WSAStartup(MAKEWORD(2, 2),&wdt);
+	auto Res = WSAStartup(MAKEWORD(2, 2),&wdt);
+	if (Res != 0)
+	{
+		ThrowException(Res);
+	}
 }
 NetworkBuilder::Starter::~Starter()
 {
@@ -34,28 +38,30 @@ std::vector<std::string> NetworkBuilder::GetDeviceIPs()
 	return IPS;
 }
 
-bool NetworkBuilder::IsConnected() const
+bool NetworkBuilder::IsConnected() const noexcept
 {
 	return HasConnection;
 }
 
-bool NetworkBuilder::Send(const std::string& data)
+void NetworkBuilder::Send(const std::string& data)
 {
 	if (send(CONNECTION_SOCKET, data.c_str(), (int)data.length(), 0) == SOCKET_ERROR)
 	{
-		closesocket(CONNECTION_SOCKET);
-		return HasConnection = false;
+		ThrowException(WSAGetLastError());
 	}
-	return true;
 }
 
 std::optional<std::string> NetworkBuilder::Receive()
 {
-	if (recv(CONNECTION_SOCKET, RECV_BUFF.get(), RECEIVE_SIZE, 0) > 0)
+	auto Res = recv(CONNECTION_SOCKET, RECV_BUFF.get(), RECEIVE_SIZE, 0);
+	if (Res > 0)
 	{
 		return RECV_BUFF.get();
 	}
-	HasConnection = false;
+	else if (Res == SOCKET_ERROR)
+	{
+		ThrowException(WSAGetLastError());
+	}
 	return {};
 }
 
@@ -65,4 +71,33 @@ void NetworkBuilder::CloseConnection()
 	closesocket(CONNECTION_SOCKET);
 	HasConnection = false;
 	CONNECTION_SOCKET = INVALID_SOCKET;
+}
+
+NetworkBuilder::Exception::Exception(int line, const char* file, const int ErrorCode) : line(line) , file(file)
+{
+	wchar_t* msg = nullptr;
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,ErrorCode,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					(LPWSTR)&msg, 0, NULL
+	              );
+	std::wstring wString(msg);
+	using convert_type = std::codecvt_utf8<wchar_t>;
+	Message = std::wstring_convert<convert_type>().to_bytes(wString);
+	LocalFree(msg);
+}
+
+const char* NetworkBuilder::Exception::what() const noexcept
+{
+	return Message.c_str();
+}
+
+int NetworkBuilder::Exception::GetLine() const noexcept
+{
+	return line;
+}
+
+const std::string& NetworkBuilder::Exception::GetFile() const noexcept
+{
+	return file;
 }

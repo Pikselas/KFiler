@@ -1,15 +1,31 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #include<WinSock2.h>
 #include<WS2tcpip.h>
 #include<string>
 #include<vector>
 #include<optional>
-#include<memory>
+#include<locale>
+#include<codecvt>
+#include<exception>
 #pragma comment (lib, "Ws2_32.lib")
 
 class NetworkBuilder
 {
+public:
+	class Exception : public std::exception
+	{
+	private:
+		int line;
+		std::string file;
+		std::string Message;
+	public:
+		Exception(int line, const char* file, const int ErrorCode);
+		const char* what() const noexcept override;
+		int GetLine() const noexcept;
+		const std::string& GetFile() const noexcept;
+	};
 private:
 	class Starter
 	{
@@ -30,8 +46,10 @@ protected:
 public:
 	static std::vector<std::string>GetDeviceIPs();
 public:
-	bool IsConnected() const;
-    bool Send(const std::string&);
+	bool IsConnected() const noexcept;
+    void Send(const std::string&);
 	std::optional<std::string> Receive();
 	void CloseConnection();
 };
+
+#define ThrowException(code) throw NetworkBuilder::Exception(__LINE__,__FILE__,code)
