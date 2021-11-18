@@ -1,6 +1,5 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #include<WinSock2.h>
 #include<WS2tcpip.h>
 #include<string>

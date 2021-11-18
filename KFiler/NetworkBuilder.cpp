@@ -73,17 +73,16 @@ void NetworkBuilder::CloseConnection()
 	CONNECTION_SOCKET = INVALID_SOCKET;
 }
 
-NetworkBuilder::Exception::Exception(int line, const char* file, const int ErrorCode) : line(line) , file(file)
+NetworkBuilder::Exception::Exception(int line, const char* file, const int ErrorCode) : line(line) , file(file) , Message(1000,0)
 {
 	wchar_t* msg = nullptr;
-	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	const auto MSgLEn = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 					NULL,ErrorCode,
 					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 					(LPWSTR)&msg, 0, NULL
 	              );
-	std::wstring wString(msg);
-	using convert_type = std::codecvt_utf8<wchar_t>;
-	Message = std::wstring_convert<convert_type>().to_bytes(wString);
+	const auto Size = WideCharToMultiByte(CP_UTF8, 0, msg, (int)MSgLEn, &Message.at(0), (int)Message.length(), nullptr, nullptr);
+	Message.resize(Size);
 	LocalFree(msg);
 }
 
