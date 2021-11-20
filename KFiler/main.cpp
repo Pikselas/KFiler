@@ -1,10 +1,15 @@
-#include"NetworkBuilder.h"
+#include"NetworkClient.h"
 #include<iostream>
 int main()
 {
-	for (auto x : NetworkBuilder::GetDeviceIPs())
+	NetworkClient nc;
+	try
 	{
-		std::cout << x << std::endl;
+		nc.Connect("127.0.0.1", "80");
+	}
+	catch (NetworkBuilder::Exception e)
+	{
+		std::cerr << e.what();
 	}
 	return 0;
 }

@@ -5,8 +5,7 @@
 #include<string>
 #include<vector>
 #include<optional>
-#include<locale>
-#include<codecvt>
+#include<memory>
 #include<exception>
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -43,12 +42,12 @@ protected:
 protected:
 	NetworkBuilder();
 public:
-	static std::vector<std::string>GetDeviceIPs();
+	static std::vector<std::string>& GetDeviceIPs();
 public:
 	bool IsConnected() const noexcept;
     void Send(const std::string&);
 	std::optional<std::string> Receive();
-	void CloseConnection();
+	void DisConnect();
 };
 
 #define ThrowException(code) throw NetworkBuilder::Exception(__LINE__,__FILE__,code)

@@ -18,12 +18,18 @@
     <ClInclude Include="NetworkBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NetworkBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

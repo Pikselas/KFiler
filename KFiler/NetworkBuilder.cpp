@@ -17,7 +17,7 @@ NetworkBuilder::NetworkBuilder()
 {
 	RECV_BUFF = std::make_unique<char[]>(RECEIVE_SIZE);
 }
-std::vector<std::string> NetworkBuilder::GetDeviceIPs()
+std::vector<std::string>& NetworkBuilder::GetDeviceIPs()
 {
 	using namespace std;
 	vector<string> IPS;
@@ -65,7 +65,7 @@ std::optional<std::string> NetworkBuilder::Receive()
 	return {};
 }
 
-void NetworkBuilder::CloseConnection()
+void NetworkBuilder::DisConnect()
 {
 	shutdown(CONNECTION_SOCKET, SD_BOTH);
 	closesocket(CONNECTION_SOCKET);
