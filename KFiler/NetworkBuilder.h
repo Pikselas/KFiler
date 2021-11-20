@@ -42,7 +42,7 @@ protected:
 protected:
 	NetworkBuilder();
 public:
-	static std::vector<std::string>& GetDeviceIPs();
+	static std::vector<std::string> GetDeviceIPs();
 public:
 	bool IsConnected() const noexcept;
     void Send(const std::string&);

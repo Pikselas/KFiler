@@ -17,7 +17,7 @@ NetworkBuilder::NetworkBuilder()
 {
 	RECV_BUFF = std::make_unique<char[]>(RECEIVE_SIZE);
 }
-std::vector<std::string>& NetworkBuilder::GetDeviceIPs()
+std::vector<std::string> NetworkBuilder::GetDeviceIPs()
 {
 	using namespace std;
 	vector<string> IPS;
@@ -67,10 +67,13 @@ std::optional<std::string> NetworkBuilder::Receive()
 
 void NetworkBuilder::DisConnect()
 {
-	shutdown(CONNECTION_SOCKET, SD_BOTH);
-	closesocket(CONNECTION_SOCKET);
-	HasConnection = false;
-	CONNECTION_SOCKET = INVALID_SOCKET;
+	if (CONNECTION_SOCKET != INVALID_SOCKET)
+	{
+		shutdown(CONNECTION_SOCKET, SD_BOTH);
+		closesocket(CONNECTION_SOCKET);
+		HasConnection = false;
+		CONNECTION_SOCKET = INVALID_SOCKET;
+	}
 }
 
 NetworkBuilder::Exception::Exception(int line, const char* file, const int ErrorCode) : line(line) , file(file) , Message(1000,0)
