@@ -1,15 +1,25 @@
-#include"NetworkClient.h"
 #include<iostream>
+#include<thread>
+#include<functional>
+#include"NetworkClient.h"
+#include"NetworkServer.h"
 int main()
 {
-	NetworkClient nc;
 	try
 	{
-		nc.Connect("127.0.0.1", "80");
+		NetworkServer ns("1024");
+		NetworkClient nc;
+		ns.Listen();
+		std::thread(std::bind(&NetworkServer::AcceptConnection,&ns)).detach();
+		nc.Connect("127.0.0.1", "1024");
+		if (nc.IsConnected())
+		{
+			std::cout << "hello";
+		}
 	}
 	catch (NetworkBuilder::Exception e)
 	{
-		std::cerr << e.what();
+		std::cout << e.what();
 	}
 	return 0;
 }

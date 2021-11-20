@@ -41,6 +41,7 @@ protected:
 	SOCKET CONNECTION_SOCKET = INVALID_SOCKET;
 protected:
 	NetworkBuilder();
+	~NetworkBuilder();
 public:
 	static std::vector<std::string> GetDeviceIPs();
 public:

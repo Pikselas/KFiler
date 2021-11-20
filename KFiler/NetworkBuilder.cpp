@@ -38,6 +38,11 @@ std::vector<std::string> NetworkBuilder::GetDeviceIPs()
 	return IPS;
 }
 
+NetworkBuilder::~NetworkBuilder()
+{
+	DisConnect();
+}
+
 bool NetworkBuilder::IsConnected() const noexcept
 {
 	return HasConnection;

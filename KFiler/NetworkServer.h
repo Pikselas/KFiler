@@ -9,5 +9,4 @@ public:
 	~NetworkServer();
 	void Listen() const;
 	void AcceptConnection();
-	void ShutDown();
 };

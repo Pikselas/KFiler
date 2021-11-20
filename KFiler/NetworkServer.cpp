@@ -32,7 +32,11 @@ NetworkServer::NetworkServer(const std::string& Port)
 
 NetworkServer::~NetworkServer()
 {
-    ShutDown();
+    if (LISTEN_SOCKET != INVALID_SOCKET)
+    {
+        closesocket(LISTEN_SOCKET);
+        LISTEN_SOCKET = INVALID_SOCKET;
+    }
 }
 
 void NetworkServer::Listen() const
@@ -48,15 +52,5 @@ void NetworkServer::AcceptConnection()
     if (CONNECTION_SOCKET == INVALID_SOCKET)
     {
         CONNECTION_SOCKET = accept(LISTEN_SOCKET, nullptr, nullptr);
-    }
-}
-
-void NetworkServer::ShutDown()
-{
-    DisConnect();
-    if (LISTEN_SOCKET != INVALID_SOCKET)
-    {
-        closesocket(LISTEN_SOCKET);
-        LISTEN_SOCKET = INVALID_SOCKET;
     }
 }
