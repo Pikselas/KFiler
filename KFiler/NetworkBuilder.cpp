@@ -2,11 +2,18 @@
 NetworkBuilder::Starter NetworkBuilder::Starter::Stuart;
 NetworkBuilder::Starter::Starter()
 {
-	WSADATA wdt;
-	auto Res = WSAStartup(MAKEWORD(2, 2),&wdt);
-	if (Res != 0)
+	try
 	{
-		ThrowException(Res);
+		WSADATA wdt;
+		auto Res = WSAStartup(MAKEWORD(2, 2), &wdt);
+		if (Res != 0)
+		{
+			ThrowException(Res);
+		}
+	}
+	catch (Exception e)
+	{
+		//.....
 	}
 }
 NetworkBuilder::Starter::~Starter()

@@ -32,11 +32,8 @@ NetworkServer::NetworkServer(const std::string& Port)
 
 NetworkServer::~NetworkServer()
 {
-    if (LISTEN_SOCKET != INVALID_SOCKET)
-    {
-        closesocket(LISTEN_SOCKET);
-        LISTEN_SOCKET = INVALID_SOCKET;
-    }
+    DisConnect();
+    DestroyServer();
 }
 
 void NetworkServer::Listen() const
@@ -52,5 +49,23 @@ void NetworkServer::AcceptConnection()
     if (CONNECTION_SOCKET == INVALID_SOCKET)
     {
         CONNECTION_SOCKET = accept(LISTEN_SOCKET, nullptr, nullptr);
+        if (CONNECTION_SOCKET == INVALID_SOCKET)
+        {
+            ThrowException(WSAGetLastError());
+        }
+        else
+        {
+            HasConnection = true;
+        }
+    }
+}
+// it doesn't destroy existing connection 
+// it stops listening
+void NetworkServer::DestroyServer()
+{
+    if (LISTEN_SOCKET != INVALID_SOCKET)
+    {
+        closesocket(LISTEN_SOCKET);
+        LISTEN_SOCKET = INVALID_SOCKET;
     }
 }
