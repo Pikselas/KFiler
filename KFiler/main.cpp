@@ -14,20 +14,16 @@ int main()
 			ns.AcceptConnection();
 			if (ns.IsConnected())
 			{
-				ns.Send("Hello");
-				ns.Send("World");
-				ns.Send("MAMA MIA");
+				ns.Send(ns.GetClientIP());
 			}
 			ns.DisConnect();
 			ns.DestroyServer();
 		};
 		std::thread(Fun).detach();
-		nc.Connect("127.0.0.1", "1024");
+		nc.Connect(NetworkBuilder::GetDeviceIPs()[0], "1024");
 		if (nc.IsConnected())
 		{
-			std::cout << nc.Receive().value()
-				      << nc.Receive().value()
-				      << nc.Receive().value();
+			std::cout << nc.Receive().value();
 
 		}
 	}

@@ -59,6 +59,13 @@ void NetworkServer::AcceptConnection()
         }
     }
 }
+std::string NetworkServer::GetClientIP() const
+{
+    SOCKADDR_IN client_info = { 0 };
+    int addrsize = sizeof(client_info);
+    getpeername(CONNECTION_SOCKET, reinterpret_cast<sockaddr*>(&client_info), &addrsize);
+    return std::string(inet_ntoa(client_info.sin_addr));
+}
 // it doesn't destroy existing connection 
 // it stops listening
 void NetworkServer::DestroyServer()

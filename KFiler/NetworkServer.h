@@ -9,5 +9,6 @@ public:
 	~NetworkServer();
 	void Listen() const;
 	void AcceptConnection();
+	std::string GetClientIP() const;
 	void DestroyServer();
 };
