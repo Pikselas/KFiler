@@ -1,5 +1,4 @@
 #include "NetworkServer.h"
-
 NetworkServer::NetworkServer(const std::string& Port)
 {
     addrinfo hint, * res;
@@ -16,7 +15,7 @@ NetworkServer::NetworkServer(const std::string& Port)
     LISTEN_SOCKET = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (LISTEN_SOCKET != INVALID_SOCKET)
     {
-        auto BindResult = bind(LISTEN_SOCKET, res->ai_addr,(int) res->ai_addrlen);
+        auto BindResult = bind(LISTEN_SOCKET, res->ai_addr, (int)res->ai_addrlen);
         freeaddrinfo(res);
         if (BindResult == SOCKET_ERROR)
         {
@@ -58,6 +57,10 @@ void NetworkServer::AcceptConnection()
             HasConnection = true;
         }
     }
+}
+const std::string& NetworkServer::GetListeningPort() const
+{
+    return ListeningOn;
 }
 std::string NetworkServer::GetClientIP() const
 {

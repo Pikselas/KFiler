@@ -1,30 +1,29 @@
 #include<iostream>
 #include<thread>
-#include<functional>
+#include"FileSender.h"
 #include"NetworkClient.h"
-#include"NetworkServer.h"
 int main()
 {
 	try
 	{
-		NetworkServer ns("1024");
+		FileSender fs("1234");
+		fs.IncreaseThread("1235");
+		fs.IncreaseThread("1236");
+		std::thread(&FileSender::StartTransfer,&fs).detach();
 		NetworkClient nc;
-		ns.Listen();
-		auto Fun = [&] {
-			ns.AcceptConnection();
-			if (ns.IsConnected())
-			{
-				ns.Send(ns.GetClientIP());
-			}
-			ns.DisConnect();
-			ns.DestroyServer();
-		};
-		std::thread(Fun).detach();
-		nc.Connect(NetworkBuilder::GetDeviceIPs()[0], "1024");
+		nc.Connect("127.0.0.1","1234");
 		if (nc.IsConnected())
 		{
-			std::cout << nc.Receive().value();
-
+			nc.Send("3");
+			while (true)
+			{
+				auto dt = nc.Receive();
+				if (dt)
+				{
+					std::cout << dt.value();
+					break;
+				}
+			}
 		}
 	}
 	catch (NetworkBuilder::Exception e)

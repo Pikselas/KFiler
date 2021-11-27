@@ -22,7 +22,7 @@ NetworkBuilder::Starter::~Starter()
 }
 NetworkBuilder::NetworkBuilder()
 {
-	RECV_BUFF = std::make_unique<char[]>(RECEIVE_SIZE);
+	ResizeReceiveBuffer(RECEIVE_SIZE);
 }
 std::vector<std::string> NetworkBuilder::GetDeviceIPs()
 {
@@ -55,6 +55,12 @@ bool NetworkBuilder::IsConnected() const noexcept
 	return HasConnection;
 }
 
+void NetworkBuilder::ResizeReceiveBuffer(int size) noexcept
+{
+	RECV_BUFF = std::make_unique<char[]>(size);
+	RECEIVE_SIZE = size;
+}
+
 void NetworkBuilder::Send(const std::string& data)
 {
 	if (send(CONNECTION_SOCKET, data.c_str(), (int)data.length(), 0) == SOCKET_ERROR)
@@ -77,7 +83,7 @@ std::optional<std::string> NetworkBuilder::Receive()
 	return {};
 }
 
-void NetworkBuilder::DisConnect()
+void NetworkBuilder::DisConnect() noexcept
 {
 	if (CONNECTION_SOCKET != INVALID_SOCKET)
 	{
