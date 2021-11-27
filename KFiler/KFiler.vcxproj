@@ -143,13 +143,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FileReceiver.h" />
     <ClInclude Include="FileSender.h" />
     <ClInclude Include="FileTransferer.h" />
+    <ClInclude Include="KsXstr.hpp" />
     <ClInclude Include="NetworkBuilder.h" />
     <ClInclude Include="NetworkClient.h" />
     <ClInclude Include="NetworkServer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileReceiver.cpp" />
     <ClCompile Include="FileSender.cpp" />
     <ClCompile Include="FileTransferer.cpp" />
     <ClCompile Include="main.cpp" />

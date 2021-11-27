@@ -1,30 +1,30 @@
 #include<iostream>
 #include<thread>
 #include"FileSender.h"
-#include"NetworkClient.h"
+#include"FileReceiver.h"
 int main()
 {
 	try
 	{
 		FileSender fs("1234");
+		FileReceiver fr;
+		
 		fs.IncreaseThread("1235");
 		fs.IncreaseThread("1236");
+		
+		fr.IncreaseThread();
+		fr.IncreaseThread();
+		fr.SetSender("127.0.0.1", "1234");
+		
 		std::thread(&FileSender::StartTransfer,&fs).detach();
-		NetworkClient nc;
-		nc.Connect("127.0.0.1","1234");
-		if (nc.IsConnected())
+
+		fr.StartTransfer();
+
+		for (auto& prt : fr.PORTS)
 		{
-			nc.Send("3");
-			while (true)
-			{
-				auto dt = nc.Receive();
-				if (dt)
-				{
-					std::cout << dt.value();
-					break;
-				}
-			}
+			std::cout << prt << std::endl;
 		}
+		
 	}
 	catch (NetworkBuilder::Exception e)
 	{

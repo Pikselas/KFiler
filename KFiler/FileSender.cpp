@@ -13,7 +13,8 @@ FileSender::~FileSender()
 	}
 	MAIN_SERVER->DestroyServer();
 }
-std::vector<FileTransferer::FileStatus> FileSender::SendFile(NetworkServer& server)
+
+std::vector<FileTransferer::FileStatus> FileSender::SendFile(std::weak_ptr<NetworkServer> server)
 {
 	return std::vector<FileStatus>();
 }
@@ -36,7 +37,10 @@ void FileSender::DecreaseThread()
 			return;
 		}
 	}
-	MAX_THREAD_COUNT--;
+	if (MAX_THREAD_COUNT > 0)
+	{
+		MAX_THREAD_COUNT--;
+	}
 }
 
 void FileSender::AddFile(const std::string& FilePath)
@@ -70,7 +74,7 @@ void FileSender::StartTransfer()
 		int Fss = (int)FileServers.size();
 		for (int i = 0; i < ThreadsCanBeUsed; i++)
 		{
-			if (i + 1 < Fss)
+			if (i < Fss)
 			{
 				TmpDt += FileServers[i]->GetListeningPort();
 			}
@@ -87,5 +91,6 @@ void FileSender::StartTransfer()
 			}
 		}
 		MAIN_SERVER->Send(TmpDt);
+		MAIN_SERVER->DisConnect();
 	}
 }

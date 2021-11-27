@@ -28,9 +28,15 @@ void NetworkClient::Connect(const std::string& Address, const std::string& Port)
             else
             {
                 HasConnection = true;
+                ConnectedOn = Port;
                 break;
             }
         }
         freeaddrinfo(res);
     }
+}
+
+const std::string& NetworkClient::GetConnectedOn() const noexcept
+{
+    return ConnectedOn;
 }

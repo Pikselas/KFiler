@@ -2,11 +2,14 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include<WinSock2.h>
 #include<WS2tcpip.h>
-#include<string>
-#include<vector>
+#include<cstdlib>
 #include<optional>
 #include<memory>
 #include<exception>
+#include<queue>
+#include<atomic>
+#include<future>
+#include<mutex>
 #pragma comment (lib, "Ws2_32.lib")
 
 class NetworkBuilder

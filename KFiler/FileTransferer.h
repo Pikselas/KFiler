@@ -1,10 +1,5 @@
 #pragma once
-#include<string>
-#include<queue>
-#include<atomic>
-#include<future>
-#include<vector>
-#include<mutex>
+#include"NetworkBuilder.h"
 class FileTransferer
 {
 public:
