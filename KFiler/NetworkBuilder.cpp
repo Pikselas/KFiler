@@ -57,8 +57,7 @@ bool NetworkBuilder::IsConnected() const noexcept
 
 void NetworkBuilder::ResizeReceiveBuffer(int size) noexcept
 {
-	RECV_BUFF = std::make_unique<char[]>(size);
-	RECEIVE_SIZE = size;
+	RECV_BUFF.resize(size);
 }
 
 void NetworkBuilder::Send(const std::string& data)
@@ -69,12 +68,12 @@ void NetworkBuilder::Send(const std::string& data)
 	}
 }
 
-std::optional<std::string> NetworkBuilder::Receive()
+std::optional<const std::string*> NetworkBuilder::Receive()
 {
-	auto Res = recv(CONNECTION_SOCKET, RECV_BUFF.get(), RECEIVE_SIZE, 0);
+	auto Res = recv(CONNECTION_SOCKET, &RECV_BUFF.at(0), RECEIVE_SIZE, 0);
 	if (Res > 0)
 	{
-		return RECV_BUFF.get();
+		return &RECV_BUFF;
 	}
 	else if (Res == SOCKET_ERROR)
 	{

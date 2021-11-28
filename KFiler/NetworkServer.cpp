@@ -31,7 +31,6 @@ NetworkServer::NetworkServer(const std::string& Port)
 
 NetworkServer::~NetworkServer()
 {
-    DisConnect();
     DestroyServer();
 }
 

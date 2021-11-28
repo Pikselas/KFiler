@@ -38,8 +38,8 @@ private:
 private:
 	constexpr static int MAX_HOST_LENGTH = 80;
 protected:
-	int RECEIVE_SIZE = 3600;
-	std::unique_ptr<char[]> RECV_BUFF;
+	constexpr static int RECEIVE_SIZE = 4096;
+	std::string RECV_BUFF;
  	bool HasConnection = false;
 	SOCKET CONNECTION_SOCKET = INVALID_SOCKET;
 protected:
@@ -51,7 +51,7 @@ public:
 	bool IsConnected() const noexcept;
 	void ResizeReceiveBuffer(int size) noexcept;
     void Send(const std::string&);
-	std::optional<std::string> Receive();
+	std::optional<const std::string*> Receive();
 	void DisConnect() noexcept;
 };
 
