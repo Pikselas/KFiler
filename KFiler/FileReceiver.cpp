@@ -40,7 +40,7 @@ void FileReceiver::StartTransfer()
 			auto dt = MAIN_CLIENT->Receive();
 			if (dt)
 			{
-				PORTS = ksTools::split_by_delms(*dt.value(), ";");
+				PORTS = ksTools::split_by_delms(dt.value().data(), ";");
 				break;
 			}
 		}

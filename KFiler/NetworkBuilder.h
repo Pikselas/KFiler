@@ -4,6 +4,7 @@
 #include<WS2tcpip.h>
 #include<cstdlib>
 #include<optional>
+#include<string_view>
 #include<memory>
 #include<exception>
 #include<queue>
@@ -51,7 +52,7 @@ public:
 	bool IsConnected() const noexcept;
 	void ResizeReceiveBuffer(int size) noexcept;
     void Send(const std::string&);
-	std::optional<const std::string*> Receive();
+	std::optional<std::string_view> Receive();
 	void DisConnect() noexcept;
 };
 

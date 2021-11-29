@@ -14,7 +14,7 @@ FileSender::~FileSender()
 	MAIN_SERVER->DestroyServer();
 }
 
-std::vector<FileTransferer::FileStatus> FileSender::SendFile(std::weak_ptr<NetworkServer> server)
+std::vector<FileTransferer::FileStatus> FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 {
 	return std::vector<FileStatus>();
 }
@@ -66,7 +66,7 @@ void FileSender::StartTransfer()
 			auto res = MAIN_SERVER->Receive();
 			if (res)
 			{
-				ThreadsCanBeUsed = std::min(std::stoi(*res.value()), MAX_THREAD_COUNT);
+				ThreadsCanBeUsed = std::min(std::stoi(std::string(res.value())), MAX_THREAD_COUNT);
 				break;
 			}
 		}

@@ -1,7 +1,9 @@
 #pragma once
 #define NOMINMAX
+#include<fstream>
 #include"FileTransferer.h"
 #include"NetworkServer.h"
+#include"KsXstr.hpp"
 class FileSender : public FileTransferer
 {
 private:
@@ -12,7 +14,7 @@ public:
 	 FileSender(const std::string& Port);
 	~FileSender();
 private:
-	std::vector<FileStatus> SendFile(std::weak_ptr<NetworkServer> FileServer);
+	std::vector<FileStatus> SendFile(std::shared_ptr<NetworkServer> FileServer);
 public:
 	void IncreaseThread(const std::string& Port);
 	void DecreaseThread();
