@@ -70,9 +70,13 @@ void NetworkBuilder::Send(const std::string& data)
 
 std::optional<std::string_view> NetworkBuilder::Receive()
 {
-	auto Res = recv(CONNECTION_SOCKET, &RECV_BUFF.at(0), RECEIVE_SIZE, 0);
+	auto Res = recv(CONNECTION_SOCKET, &RECV_BUFF.at(0), RECV_BUFF.length(), 0);
 	if (Res > 0)
 	{
+		if (Res < RECV_BUFF.length())
+		{
+			return std::string_view(RECV_BUFF).substr(0,Res);
+		}
 		return RECV_BUFF;
 	}
 	else if (Res == SOCKET_ERROR)
