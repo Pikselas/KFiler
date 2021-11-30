@@ -83,6 +83,10 @@ std::optional<std::string_view> NetworkBuilder::Receive()
 	{
 		ThrowException(WSAGetLastError());
 	}
+	else
+	{
+		HasConnection = false;
+	}
 	return {};
 }
 

@@ -15,6 +15,7 @@ public:
 	~FileSender();
 private:
 	std::vector<FileStatus> SendFile(std::shared_ptr<NetworkServer> FileServer);
+	static size_t GetFileSize(std::ifstream& file);
 public:
 	void IncreaseThread(const std::string& Port);
 	void DecreaseThread();

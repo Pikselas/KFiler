@@ -14,7 +14,7 @@ int main()
 		
 		fr.IncreaseThread();
 		fr.IncreaseThread();
-		fr.SetSender("127.0.0.1", "1234");
+		fr.SetSender(NetworkBuilder::GetDeviceIPs()[0], "1234");
 		
 		std::thread(&FileSender::StartTransfer,&fs).detach();
 
