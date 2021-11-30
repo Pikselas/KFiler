@@ -16,7 +16,52 @@ FileSender::~FileSender()
 
 std::vector<FileTransferer::FileStatus> FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 {
-	return std::vector<FileStatus>();
+	USING_THREADS++;
+	std::vector<FileStatus> FS;
+	try
+	{
+		constexpr auto FileBufferSize = 1024;
+		auto FileBuffer = std::make_unique<char[]>(FileBufferSize + 1);
+		server->AcceptConnection();
+		while (server->IsConnected() && ContinueTransfer)
+		{
+			//wait for response
+			while (server->IsConnected() && !server->Receive().has_value());
+			//popping from pending files getting the actual filename and sending to receiver
+			const auto FilePath = PendingFiles.front();
+			PendingFiles.pop();
+			const auto fileName = ksTools::split_by_delms(FilePath, "/").back();
+			std::ifstream FL(FilePath, std::ios::binary);
+			const auto fileSize = GetFileSize(FL);
+			server->Send(fileName + ';' + std::to_string(fileSize));
+			//wait for response
+			while (server->IsConnected() && !server->Receive().has_value());
+			while (server->IsConnected() && FL.good())
+			{
+				FileBuffer.get()[FL.gcount()] = '\0';
+				server->Send(FileBuffer.get());
+				if (FL.tellg() == -1)
+				{
+					FS.emplace_back(fileName, fileSize, true);
+				}
+			}
+			FL.close();
+		}
+		server->DisConnect();
+	}
+	catch (NetworkBuilder::Exception e)
+	{
+		//..
+	}
+	USING_THREADS--;
+	return FS;
+}
+size_t FileSender::GetFileSize(std::ifstream& file)
+{
+	file.seekg(0, file.end);
+	size_t len = file.tellg();
+	file.seekg(0, file.beg);
+	return size_t();
 }
 void FileSender::IncreaseThread(const std::string& Port)
 {
@@ -72,11 +117,13 @@ void FileSender::StartTransfer()
 		}
 		std::string TmpDt = "";
 		int Fss = (int)FileServers.size();
+		auto Itr = FileServers.end();
 		for (int i = 0; i < ThreadsCanBeUsed; i++)
 		{
 			if (i < Fss)
 			{
 				TmpDt += FileServers[i]->GetListeningPort();
+				Itr = FileServers.begin() + i;
 			}
 			else
 			{
@@ -84,11 +131,15 @@ void FileSender::StartTransfer()
 				TmpDt += TmpPort;
 				FileServers.emplace_back(std::make_shared<NetworkServer>(TmpPort));
 				UseablePorts.pop();
+				Itr = FileServers.end() - 1;
 			}
 			if (i + 1 < ThreadsCanBeUsed)
 			{
 			  TmpDt += ";";
 			}
+			std::packaged_task<std::vector<FileStatus>()> task(std::bind(&FileSender::SendFile, this, *Itr));
+			StatusList.emplace_back(task.get_future());
+			std::thread(std::move(task)).detach();
 		}
 		MAIN_SERVER->Send(TmpDt);
 		MAIN_SERVER->DisConnect();
