@@ -62,7 +62,12 @@ void NetworkBuilder::ResizeReceiveBuffer(int size) noexcept
 
 void NetworkBuilder::Send(const std::string& data)
 {
-	if (send(CONNECTION_SOCKET, data.c_str(), (int)data.length(), 0) == SOCKET_ERROR)
+	Send(data.c_str(), data.length());
+}
+
+void NetworkBuilder::Send(const char* DataBuffer, const size_t DataLen)
+{
+	if (send(CONNECTION_SOCKET, DataBuffer , DataLen, 0) == SOCKET_ERROR)
 	{
 		ThrowException(WSAGetLastError());
 	}
@@ -78,6 +83,28 @@ std::optional<std::string_view> NetworkBuilder::Receive()
 			return std::string_view(RECV_BUFF).substr(0,Res);
 		}
 		return RECV_BUFF;
+	}
+	else if (Res == SOCKET_ERROR)
+	{
+		ThrowException(WSAGetLastError());
+	}
+	else
+	{
+		HasConnection = false;
+	}
+	return {};
+}
+
+std::optional<std::pair<const char*,size_t>> NetworkBuilder::Receive(size_t size)
+{
+	if (size > RECV_BUFF.length())
+	{
+		RECV_BUFF.resize(size);
+	}
+	auto Res = recv(CONNECTION_SOCKET, &RECV_BUFF.at(0), size, 0);
+	if (Res > 0)
+	{
+		return std::make_pair(& RECV_BUFF.at(0), Res);
 	}
 	else if (Res == SOCKET_ERROR)
 	{
