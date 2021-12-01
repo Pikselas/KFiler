@@ -19,11 +19,7 @@ int main()
 		std::thread(&FileSender::StartTransfer,&fs).detach();
 
 		fr.StartTransfer();
-
-		for (auto& prt : fr.PORTS)
-		{
-			std::cout << prt << std::endl;
-		}
+		std::cin.get();
 		
 	}
 	catch (NetworkBuilder::Exception e)

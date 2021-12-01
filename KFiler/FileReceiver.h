@@ -1,4 +1,5 @@
 #pragma once
+#include<fstream>
 #include"FileTransferer.h"
 #include"NetworkClient.h"
 #include"KsXstr.hpp"
@@ -13,6 +14,8 @@ public:
 	std::vector<std::string> PORTS;
 public:
 	FileReceiver();
+private:
+	size_t ReceiveFile(std::shared_ptr<NetworkClient> client,const std::string& port);
 public:
 	void IncreaseThread();
 	void DecreaseThread();

@@ -14,38 +14,54 @@ FileSender::~FileSender()
 	MAIN_SERVER->DestroyServer();
 }
 
-std::vector<FileTransferer::FileStatus> FileSender::SendFile(std::shared_ptr<NetworkServer> server)
+size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 {
 	USING_THREADS++;
-	std::vector<FileStatus> FS;
+	size_t count = 0;
 	try
 	{
 		constexpr auto FileBufferSize = 1024;
 		auto FileBuffer = std::make_unique<char[]>(FileBufferSize + 1);
+		server->Listen();
 		server->AcceptConnection();
 		while (server->IsConnected() && ContinueTransfer)
 		{
 			//wait for response
 			while (server->IsConnected() && !server->Receive().has_value());
 			//popping from pending files getting the actual filename and sending to receiver
-			const auto FilePath = PendingFiles.front();
-			PendingFiles.pop();
-			const auto fileName = ksTools::split_by_delms(FilePath, "/").back();
-			std::ifstream FL(FilePath, std::ios::binary);
-			const auto fileSize = GetFileSize(FL);
-			server->Send(fileName + ';' + std::to_string(fileSize));
-			//wait for response
-			while (server->IsConnected() && !server->Receive().has_value());
-			while (server->IsConnected() && FL.good())
+			mtx.lock();
+			if (!PendingFiles.empty())
 			{
-				FileBuffer.get()[FL.gcount()] = '\0';
-				server->Send(FileBuffer.get());
-				if (FL.tellg() == -1)
+				const auto FilePath = PendingFiles.front();
+				PendingFiles.pop();
+				mtx.unlock();
+				const auto fileName = ksTools::split_by_delms(FilePath, "/").back();
+				std::ifstream FL(FilePath, std::ios::binary);
+				const auto fileSize = GetFileSize(FL);
+				server->Send(fileName + ';' + std::to_string(fileSize));
+				//wait for response
+				while (server->IsConnected() && !server->Receive().has_value());
+				while (server->IsConnected() && FL.good())
 				{
-					FS.emplace_back(fileName, fileSize, true);
+					FL.read(FileBuffer.get(), FileBufferSize);
+					//using overloaded function so that no data get losts
+					FileBuffer.get()[FL.gcount()] = '\0';
+					server->Send(FileBuffer.get(), FL.gcount());
+					if (FL.tellg() == -1)
+					{
+						mtx.lock();
+						StatusList.emplace_back(fileName, fileSize, true);
+						mtx.unlock();
+						count++;
+					}
 				}
+				FL.close();
 			}
-			FL.close();
+			else
+			{
+				mtx.unlock();
+				break;
+			}
 		}
 		server->DisConnect();
 	}
@@ -54,14 +70,14 @@ std::vector<FileTransferer::FileStatus> FileSender::SendFile(std::shared_ptr<Net
 		//..
 	}
 	USING_THREADS--;
-	return FS;
+	return count;
 }
 size_t FileSender::GetFileSize(std::ifstream& file)
 {
 	file.seekg(0, file.end);
 	size_t len = file.tellg();
 	file.seekg(0, file.beg);
-	return size_t();
+	return len;
 }
 void FileSender::IncreaseThread(const std::string& Port)
 {
@@ -137,8 +153,8 @@ void FileSender::StartTransfer()
 			{
 			  TmpDt += ";";
 			}
-			std::packaged_task<std::vector<FileStatus>()> task(std::bind(&FileSender::SendFile, this, *Itr));
-			StatusList.emplace_back(task.get_future());
+			std::packaged_task<size_t()> task(std::bind(&FileSender::SendFile, this, *Itr));
+			FileCountList.emplace_back(task.get_future());
 			std::thread(std::move(task)).detach();
 		}
 		MAIN_SERVER->Send(TmpDt);
