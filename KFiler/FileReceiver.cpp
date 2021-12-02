@@ -31,8 +31,8 @@ FileReceiver::ITRListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClien
 			}
 			client->Send("YS");
 			mtx.lock();
-			StatusTracker.emplace_back(Name, FileSize, 0);
-			List.emplace_back(StatusTracker.end() - 1);
+			FileStatusList.emplace_back(Name, FileSize, 0);
+			List.emplace_back(FileStatusList.end() - 1);
 			mtx.unlock();
 			std::ofstream FL(Name, std::ios::binary);
 			size_t RecvCount = 0;
@@ -86,8 +86,8 @@ void FileReceiver::StartTransfer()
 {
 	ContinueTransfer = true;
 	
-	//StatusTracker.clear();
-	//StatusTracker.reserve(PendingFiles.size());
+	//FileStatusList.clear();
+	//FileStatusList.reserve(PendingFiles.size());
 
 	MAIN_CLIENT->Connect(Sender.first, Sender.second);
 	if (MAIN_CLIENT->IsConnected())

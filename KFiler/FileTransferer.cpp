@@ -5,9 +5,9 @@ const FileTransferer::FileQtype& FileTransferer::GetPendings() const noexcept
 	return PendingFiles;
 }
 
-const FileTransferer::TrackerType& FileTransferer::GetFileStatusList() const noexcept
+const FileTransferer::FileStatusListType& FileTransferer::GetFileStatusList() const noexcept
 {	
-	return StatusTracker;
+	return FileStatusList;
 }
 
 const FileTransferer::ReportType& FileTransferer::GetTransferReport() const noexcept

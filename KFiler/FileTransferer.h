@@ -13,7 +13,7 @@ public:
 	};
 public:
 	typedef std::queue<std::string> FileQtype;
-	typedef std::vector<FileStatus> TrackerType;
+	typedef std::vector<FileStatus> FileStatusListType;
 	typedef std::vector<FileStatus>::iterator StatusITRType;
 	typedef std::list<StatusITRType> ITRListType;
 	typedef std::unordered_map<std::string, std::future<ITRListType>> ReportType;
@@ -24,12 +24,12 @@ protected:
 protected:
 	std::atomic_bool ContinueTransfer = false;
 	FileQtype PendingFiles;
-	TrackerType StatusTracker;
+	FileStatusListType FileStatusList;
 	ReportType TransferReport;
 	std::mutex mtx;
 public:
 	const FileQtype& GetPendings() const noexcept;
-	const TrackerType& GetFileStatusList() const noexcept;
+	const FileStatusListType& GetFileStatusList() const noexcept;
 	const ReportType& GetTransferReport() const noexcept;
 	int GetMaxThreadCount() const noexcept;
 	int GetUsingThreadCount() const noexcept;

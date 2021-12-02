@@ -40,8 +40,8 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 				const auto fileSize = GetFileSize(FL);
 				server->Send(fileName + ';' + std::to_string(fileSize));
 				mtx.lock();
-				StatusTracker.emplace_back(fileName, fileSize, 0);
-				List.emplace_back(StatusTracker.end() - 1);
+				FileStatusList.emplace_back(fileName, fileSize, 0);
+				List.emplace_back(FileStatusList.end() - 1);
 				mtx.unlock();
 				//wait for response
 				while (server->IsConnected() && !server->Receive().has_value());
@@ -120,8 +120,8 @@ void FileSender::StartTransfer()
 {
 	ContinueTransfer = true;
 
-	StatusTracker.clear();
-	StatusTracker.reserve(PendingFiles.size());
+	FileStatusList.clear();
+	FileStatusList.reserve(PendingFiles.size());
 
 	int ThreadsCanBeUsed = 0;
 	MAIN_SERVER->AcceptConnection();
