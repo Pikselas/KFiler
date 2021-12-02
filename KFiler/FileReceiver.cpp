@@ -36,7 +36,7 @@ FileReceiver::ITRListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClien
 			mtx.unlock();
 			std::ofstream FL(Name, std::ios::binary);
 			size_t RecvCount = 0;
-			while (client->IsConnected())
+			while (client->IsConnected() && RecvCount < FileSize)
 			{
 				auto dt = client->Receive(TRANSFER_RATE);
 				if (dt)
@@ -44,15 +44,12 @@ FileReceiver::ITRListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClien
 					auto d = dt.value();
 					RecvCount += d.second;
 					List.back()->transferred = RecvCount;
-					FL.write(d.first,d.second);
-					if (RecvCount >= FileSize)
-					{
-						break;
-					}					
+					FL.write(d.first,d.second);					
 				}
 			}
 			FL.close();
 		}
+		client->DisConnect();
 	}
 	catch (NetworkBuilder::Exception e)
 	{
@@ -88,6 +85,10 @@ void FileReceiver::StopTransfer()
 void FileReceiver::StartTransfer()
 {
 	ContinueTransfer = true;
+	
+	//StatusTracker.clear();
+	//StatusTracker.reserve(PendingFiles.size());
+
 	MAIN_CLIENT->Connect(Sender.first, Sender.second);
 	if (MAIN_CLIENT->IsConnected())
 	{
@@ -101,6 +102,10 @@ void FileReceiver::StartTransfer()
 				break;
 			}
 		}
+		
+		TransferReport.clear();
+		TransferReport.reserve(PORTS.size());
+		
 		for (auto& prt : PORTS)
 		{
 			Clients.emplace_back(std::make_shared<NetworkClient>());

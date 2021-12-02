@@ -10,6 +10,11 @@ const FileTransferer::TrackerType& FileTransferer::GetFileStatusList() const noe
 	return StatusTracker;
 }
 
+const FileTransferer::ReportType& FileTransferer::GetTransferReport() const noexcept
+{
+	return TransferReport;
+}
+
 int FileTransferer::GetMaxThreadCount() const noexcept
 {
 	return MAX_THREAD_COUNT;

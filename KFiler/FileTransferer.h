@@ -30,6 +30,7 @@ protected:
 public:
 	const FileQtype& GetPendings() const noexcept;
 	const TrackerType& GetFileStatusList() const noexcept;
+	const ReportType& GetTransferReport() const noexcept;
 	int GetMaxThreadCount() const noexcept;
 	int GetUsingThreadCount() const noexcept;
 	void SetTransferRate(const size_t Bytes) noexcept;

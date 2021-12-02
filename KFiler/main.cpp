@@ -6,6 +6,7 @@ int main()
 {
 	try
 	{
+		auto trnsfSize = 100;
 		//creating a sender 
 		FileSender fs("1234");
 		
@@ -17,19 +18,29 @@ int main()
 		
 		//increasing channel for sender with a port ->defaults to 0
 		fs.IncreaseThread("1235");
+		fs.SetTransferRate(trnsfSize);
+		fr.SetTransferRate(trnsfSize);
 		
 		//increasing channel for receiver (no port need to be added for receiver)->dfaults to 0
 		fr.IncreaseThread();
 
 		//setting sender's address and port
 		fr.SetSender(NetworkBuilder::GetDeviceIPs()[0], "1234");
-		
 		//sending file via child thread
 		std::thread(&FileSender::StartTransfer,&fs).detach();
 		
 		//receiving file via main thread
 		fr.StartTransfer();
-		
+		auto&[report,ftr] = *fs.GetTransferReport().begin();
+		auto& lst = fs.GetFileStatusList();
+		while (ftr.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+		{
+			if (!lst.empty())
+			{
+				system("cls");
+				std::cout << lst.front().size << ":" << lst.front().transferred;
+			}
+		}
 		std::cin.get();
 		
 	}

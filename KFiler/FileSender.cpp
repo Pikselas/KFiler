@@ -39,6 +39,10 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 				std::ifstream FL(FilePath, std::ios::binary);
 				const auto fileSize = GetFileSize(FL);
 				server->Send(fileName + ';' + std::to_string(fileSize));
+				mtx.lock();
+				StatusTracker.emplace_back(fileName, fileSize, 0);
+				List.emplace_back(StatusTracker.end() - 1);
+				mtx.unlock();
 				//wait for response
 				while (server->IsConnected() && !server->Receive().has_value());
 				while (server->IsConnected() && FL.good())
@@ -49,8 +53,10 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 						FileBuffer = std::make_unique<char[]>(FileBufferSize);
 					}
 					FL.read(FileBuffer.get(), FileBufferSize);
+					size_t ReadCount = FL.gcount();
+					List.back()->transferred += ReadCount;
 					//using overloaded function so that no data get losts
-					server->Send(FileBuffer.get(), FL.gcount());
+					server->Send(FileBuffer.get(), ReadCount);
 				}
 				FL.close();
 			}
@@ -113,6 +119,10 @@ void FileSender::StopTransfer()
 void FileSender::StartTransfer()
 {
 	ContinueTransfer = true;
+
+	StatusTracker.clear();
+	StatusTracker.reserve(PendingFiles.size());
+
 	int ThreadsCanBeUsed = 0;
 	MAIN_SERVER->AcceptConnection();
 	if (MAIN_SERVER->IsConnected())
@@ -131,6 +141,10 @@ void FileSender::StartTransfer()
 		std::string TmpDt = "";
 		int Fss = (int)FileServers.size();
 		auto Itr = FileServers.end();
+		
+		TransferReport.clear();
+		TransferReport.reserve(ThreadsCanBeUsed);
+		
 		for (int i = 0; i < ThreadsCanBeUsed; i++)
 		{
 			std::string TmpPort;
