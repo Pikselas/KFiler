@@ -34,7 +34,7 @@ size_t FileReceiver::ReceiveFile(std::shared_ptr<NetworkClient> client ,const st
 			size_t RecvCount = 0;
 			while (client->IsConnected())
 			{
-				auto dt = client->Receive(1024);
+				auto dt = client->Receive(TRANSFER_RATE);
 				if (dt)
 				{
 					auto d = dt.value();

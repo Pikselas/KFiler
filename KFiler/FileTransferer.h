@@ -21,6 +21,7 @@ public:
 protected:
 	int MAX_THREAD_COUNT = 0;
 	std::atomic_int USING_THREADS = 0;
+	std::atomic_size_t TRANSFER_RATE = 4096;
 protected:
 	std::atomic_bool ContinueTransfer = false;
 	FileQtype PendingFiles;
@@ -32,6 +33,8 @@ public:
 	const StatusLtype& GetFileStatusList() const noexcept;
 	int GetMaxThreadCount() const noexcept;
 	int GetUsingThreadCount() const noexcept;
+	void SetTransferRate(const size_t Bytes) noexcept;
+	size_t GetTransferRate() const noexcept;
 	virtual void StopTransfer() = 0;
 	virtual void StartTransfer() = 0;
 };

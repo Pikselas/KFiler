@@ -20,8 +20,8 @@ size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 	size_t count = 0;
 	try
 	{
-		constexpr auto FileBufferSize = 1024;
-		auto FileBuffer = std::make_unique<char[]>(FileBufferSize + 1);
+		size_t FileBufferSize = TRANSFER_RATE;
+		auto FileBuffer = std::make_unique<char[]>(FileBufferSize);
 		server->Listen();
 		server->AcceptConnection();
 		while (server->IsConnected() && ContinueTransfer)
@@ -43,9 +43,13 @@ size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 				while (server->IsConnected() && !server->Receive().has_value());
 				while (server->IsConnected() && FL.good())
 				{
+					if (FileBufferSize != TRANSFER_RATE)
+					{
+						FileBufferSize = TRANSFER_RATE;
+						FileBuffer = std::make_unique<char[]>(FileBufferSize);
+					}
 					FL.read(FileBuffer.get(), FileBufferSize);
 					//using overloaded function so that no data get losts
-					FileBuffer.get()[FL.gcount()] = '\0';
 					server->Send(FileBuffer.get(), FL.gcount());
 					if (FL.tellg() == -1)
 					{
