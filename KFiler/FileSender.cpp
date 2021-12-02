@@ -14,10 +14,10 @@ FileSender::~FileSender()
 	MAIN_SERVER->DestroyServer();
 }
 
-size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
+FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 {
 	USING_THREADS++;
-	size_t count = 0;
+	ITRListType List;
 	try
 	{
 		size_t FileBufferSize = TRANSFER_RATE;
@@ -29,9 +29,9 @@ size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 			//wait for response
 			while (server->IsConnected() && !server->Receive().has_value());
 			//popping from pending files getting the actual filename and sending to receiver
-			mtx.lock();
 			if (!PendingFiles.empty())
 			{
+				mtx.lock();
 				const auto FilePath = PendingFiles.front();
 				PendingFiles.pop();
 				mtx.unlock();
@@ -51,19 +51,11 @@ size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 					FL.read(FileBuffer.get(), FileBufferSize);
 					//using overloaded function so that no data get losts
 					server->Send(FileBuffer.get(), FL.gcount());
-					if (FL.tellg() == -1)
-					{
-						mtx.lock();
-						StatusList.emplace_back(fileName, fileSize, true);
-						mtx.unlock();
-						count++;
-					}
 				}
 				FL.close();
 			}
 			else
 			{
-				mtx.unlock();
 				break;
 			}
 		}
@@ -74,7 +66,7 @@ size_t FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 		//..
 	}
 	USING_THREADS--;
-	return count;
+	return List;
 }
 size_t FileSender::GetFileSize(std::ifstream& file)
 {
@@ -132,6 +124,7 @@ void FileSender::StartTransfer()
 			if (res)
 			{
 				ThreadsCanBeUsed = std::min(std::stoi(std::string(res.value())), MAX_THREAD_COUNT);
+				TransferReport.reserve(ThreadsCanBeUsed);
 				break;
 			}
 		}
@@ -140,25 +133,26 @@ void FileSender::StartTransfer()
 		auto Itr = FileServers.end();
 		for (int i = 0; i < ThreadsCanBeUsed; i++)
 		{
+			std::string TmpPort;
 			if (i < Fss)
 			{
-				TmpDt += FileServers[i]->GetListeningPort();
+				TmpPort = FileServers[i]->GetListeningPort();
 				Itr = FileServers.begin() + i;
 			}
 			else
 			{
-				auto& TmpPort = UseablePorts.front();
-				TmpDt += TmpPort;
+				TmpPort = UseablePorts.front();
 				FileServers.emplace_back(std::make_shared<NetworkServer>(TmpPort));
 				UseablePorts.pop();
 				Itr = FileServers.end() - 1;
 			}
+			TmpDt += TmpPort;
 			if (i + 1 < ThreadsCanBeUsed)
 			{
 			  TmpDt += ";";
 			}
-			std::packaged_task<size_t()> task(std::bind(&FileSender::SendFile, this, *Itr));
-			FileCountList.emplace_back(task.get_future());
+			std::packaged_task<ITRListType()> task(std::bind(&FileSender::SendFile, this, *Itr));
+			TransferReport.emplace(TmpPort, task.get_future());
 			std::thread(std::move(task)).detach();
 		}
 		MAIN_SERVER->Send(TmpDt);
