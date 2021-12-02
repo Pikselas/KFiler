@@ -3,7 +3,7 @@
 #include"FileTransferer.h"
 #include"NetworkClient.h"
 #include"KsXstr.hpp"
-class FileReceiver : FileTransferer
+class FileReceiver : public FileTransferer
 {
 private:
 	std::unique_ptr<NetworkClient> MAIN_CLIENT;
