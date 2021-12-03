@@ -4,10 +4,10 @@ FileReceiver::FileReceiver()
 	MAIN_CLIENT = std::make_unique<NetworkClient>();
 }
 
-FileReceiver::ITRListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClient> client ,const std::string& port)
+FileReceiver::IndxListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClient> client ,const std::string& port)
 {
 	USING_THREADS++;
-	ITRListType List;
+	IndxListType List;
 	try
 	{
 		client->Connect(Sender.first, port);
@@ -32,7 +32,7 @@ FileReceiver::ITRListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClien
 			client->Send("YS");
 			mtx.lock();
 			FileStatusList.emplace_back(Name, FileSize, 0);
-			List.emplace_back(FileStatusList.end() - 1);
+			List.emplace_back(FileStatusList.size() - 1);
 			mtx.unlock();
 			std::ofstream FL(Name, std::ios::binary);
 			size_t RecvCount = 0;
@@ -43,7 +43,7 @@ FileReceiver::ITRListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClien
 				{
 					auto d = dt.value();
 					RecvCount += d.second;
-					List.back()->transferred = RecvCount;
+					FileStatusList[List.back()].transferred = RecvCount;
 					FL.write(d.first,d.second);					
 				}
 			}
@@ -109,7 +109,7 @@ void FileReceiver::StartTransfer()
 		for (auto& prt : PORTS)
 		{
 			Clients.emplace_back(std::make_shared<NetworkClient>());
-			std::packaged_task<ITRListType()> tsk(std::bind(&FileReceiver::ReceiveFile, this, Clients.back(),prt));
+			std::packaged_task<IndxListType()> tsk(std::bind(&FileReceiver::ReceiveFile, this, Clients.back(),prt));
 			TransferReport.emplace(prt, tsk.get_future());
 			std::thread(std::move(tsk)).detach();
 		}

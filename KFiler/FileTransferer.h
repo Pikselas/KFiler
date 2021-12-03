@@ -14,9 +14,8 @@ public:
 public:
 	typedef std::queue<std::string> FileQtype;
 	typedef std::vector<FileStatus> FileStatusListType;
-	typedef std::vector<FileStatus>::iterator StatusITRType;
-	typedef std::list<StatusITRType> ITRListType;
-	typedef std::unordered_map<std::string, std::future<ITRListType>> ReportType;
+	typedef std::list<size_t> IndxListType;
+	typedef std::unordered_map<std::string, std::future<IndxListType>> ReportType;
 protected:
 	int MAX_THREAD_COUNT = 0;
 	std::atomic_int USING_THREADS = 0;

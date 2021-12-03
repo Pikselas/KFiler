@@ -14,10 +14,10 @@ FileSender::~FileSender()
 	MAIN_SERVER->DestroyServer();
 }
 
-FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> server)
+FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> server)
 {
 	USING_THREADS++;
-	ITRListType List;
+	IndxListType List;
 	try
 	{
 		int FileBufferSize = TRANSFER_RATE;
@@ -41,7 +41,7 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 				server->Send(fileName + ';' + std::to_string(fileSize));
 				mtx.lock();
 				FileStatusList.emplace_back(fileName, fileSize, 0);
-				List.emplace_back(FileStatusList.end() - 1);
+				List.emplace_back(FileStatusList.size() - 1);
 				mtx.unlock();
 				//wait for response
 				while (server->IsConnected() && !server->Receive().has_value());
@@ -54,7 +54,7 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 					}
 					FL.read(FileBuffer.get(), FileBufferSize);
 					int ReadCount = (int)FL.gcount();
-					List.back()->transferred += ReadCount;
+					FileStatusList[List.back()].transferred += ReadCount;
 					//using overloaded function so that no data get losts
 					server->Send(FileBuffer.get(), ReadCount);
 				}
@@ -165,7 +165,7 @@ void FileSender::StartTransfer()
 			{
 			  TmpDt += ";";
 			}
-			std::packaged_task<ITRListType()> task(std::bind(&FileSender::SendFile, this, *Itr));
+			std::packaged_task<IndxListType()> task(std::bind(&FileSender::SendFile, this, *Itr));
 			TransferReport.emplace(TmpPort, task.get_future());
 			std::thread(std::move(task)).detach();
 		}

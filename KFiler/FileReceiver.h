@@ -15,7 +15,7 @@ public:
 public:
 	FileReceiver();
 private:
-	ITRListType ReceiveFile(std::shared_ptr<NetworkClient> client,const std::string& port);
+	IndxListType ReceiveFile(std::shared_ptr<NetworkClient> client,const std::string& port);
 public:
 	void IncreaseThread();
 	void DecreaseThread();

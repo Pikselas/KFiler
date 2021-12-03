@@ -14,7 +14,7 @@ public:
 	 FileSender(const std::string& Port);
 	~FileSender();
 private:
-	ITRListType SendFile(std::shared_ptr<NetworkServer> FileServer);
+	IndxListType SendFile(std::shared_ptr<NetworkServer> FileServer);
 	static size_t GetFileSize(std::ifstream& file);
 public:
 	void IncreaseThread(const std::string& Port);
