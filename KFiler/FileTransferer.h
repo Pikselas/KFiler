@@ -12,7 +12,6 @@ public:
 		size_t transferred;
 	};
 public:
-	typedef std::queue<std::string> FileQtype;
 	typedef std::vector<FileStatus> FileStatusListType;
 	typedef std::list<size_t> IndxListType;
 	typedef std::unordered_map<std::string, std::future<IndxListType>> ReportType;
@@ -22,12 +21,10 @@ protected:
 	std::atomic_int TRANSFER_RATE = 4096;
 protected:
 	std::atomic_bool ContinueTransfer = false;
-	FileQtype PendingFiles;
 	FileStatusListType FileStatusList;
 	ReportType TransferReport;
 	std::mutex mtx;
 public:
-	const FileQtype& GetPendings() const noexcept;
 	const FileStatusListType& GetFileStatusList() const noexcept;
 	const ReportType& GetTransferReport() const noexcept;
 	int GetMaxThreadCount() const noexcept;

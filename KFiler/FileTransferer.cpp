@@ -1,10 +1,5 @@
 #include "FileTransferer.h"
 
-const FileTransferer::FileQtype& FileTransferer::GetPendings() const noexcept
-{
-	return PendingFiles;
-}
-
 const FileTransferer::FileStatusListType& FileTransferer::GetFileStatusList() const noexcept
 {	
 	return FileStatusList;

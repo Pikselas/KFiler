@@ -111,6 +111,11 @@ void FileSender::AddFile(const std::string& FilePath)
 	PendingFiles.push(FilePath);
 }
 
+const FileSender::FileQtype& FileSender::GetPendings() const noexcept
+{
+	return PendingFiles;
+}
+
 void FileSender::StopTransfer()
 {
 	ContinueTransfer = false;
