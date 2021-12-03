@@ -50,7 +50,7 @@ public:
 	static std::vector<std::string> GetDeviceIPs();
 public:
 	bool IsConnected() const noexcept;
-	void ResizeReceiveBuffer(const int size) noexcept;
+	void ResizeReceiveBuffer(const size_t size) noexcept;
     void Send(const std::string& data);
 	void Send(const char* DataBuffer, const size_t DataLen);
 	std::optional<std::string_view> Receive();

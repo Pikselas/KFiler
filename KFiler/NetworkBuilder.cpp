@@ -55,7 +55,7 @@ bool NetworkBuilder::IsConnected() const noexcept
 	return HasConnection;
 }
 
-void NetworkBuilder::ResizeReceiveBuffer(int size) noexcept
+void NetworkBuilder::ResizeReceiveBuffer(const size_t size) noexcept
 {
 	RECV_BUFF.resize(size);
 }
