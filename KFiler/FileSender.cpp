@@ -20,7 +20,7 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 	ITRListType List;
 	try
 	{
-		size_t FileBufferSize = TRANSFER_RATE;
+		int FileBufferSize = TRANSFER_RATE;
 		auto FileBuffer = std::make_unique<char[]>(FileBufferSize);
 		server->Listen();
 		server->AcceptConnection();
@@ -53,7 +53,7 @@ FileSender::ITRListType FileSender::SendFile(std::shared_ptr<NetworkServer> serv
 						FileBuffer = std::make_unique<char[]>(FileBufferSize);
 					}
 					FL.read(FileBuffer.get(), FileBufferSize);
-					size_t ReadCount = FL.gcount();
+					int ReadCount = (int)FL.gcount();
 					List.back()->transferred += ReadCount;
 					//using overloaded function so that no data get losts
 					server->Send(FileBuffer.get(), ReadCount);

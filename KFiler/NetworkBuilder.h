@@ -39,8 +39,8 @@ private:
 private:
 	constexpr static int MAX_HOST_LENGTH = 80;
 protected:
-	constexpr static int RECEIVE_SIZE = 4096;
-	std::string RECV_BUFF;
+	int RECEIVE_BUFF_SIZE = 4096;
+	std::unique_ptr<char[]> RECV_BUFF;
  	bool HasConnection = false;
 	SOCKET CONNECTION_SOCKET = INVALID_SOCKET;
 protected:
@@ -50,11 +50,11 @@ public:
 	static std::vector<std::string> GetDeviceIPs();
 public:
 	bool IsConnected() const noexcept;
-	void ResizeReceiveBuffer(const size_t size) noexcept;
+	void ResizeReceiveBuffer(const int size) noexcept;
     void Send(const std::string& data);
-	void Send(const char* DataBuffer, const size_t DataLen);
+	void Send(const char* DataBuffer, const int DataLen);
 	std::optional<std::string_view> Receive();
-	std::optional<std::pair<const char*,size_t>> Receive(size_t size);
+	std::optional<std::pair<const char*,int>> Receive(int size);
 	void DisConnect() noexcept;
 };
 

@@ -25,12 +25,12 @@ int FileTransferer::GetUsingThreadCount() const noexcept
 	return USING_THREADS;
 }
 
-void FileTransferer::SetTransferRate(const size_t Bytes) noexcept
+void FileTransferer::SetTransferRate(const int Bytes) noexcept
 {
 	TRANSFER_RATE = Bytes;
 }
 
-size_t FileTransferer::GetTransferRate() const noexcept
+int FileTransferer::GetTransferRate() const noexcept
 {
 	return TRANSFER_RATE;
 }
