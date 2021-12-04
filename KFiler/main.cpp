@@ -6,49 +6,120 @@ int main()
 {
 	try
 	{
-		auto trnsfSize = 1;
-		//creating a sender 
-		FileSender fs("1234");
-		
-		//creating a receiver 
-		FileReceiver fr;
-		
-		//adding file for sending
-		fs.AddFile("C:/Users/Aritra Maji/Downloads/Umiko_Ahagon_X_Sakura_Nene.png");
-		
-		//increasing channel for sender with a port ->defaults to 0
-		fs.IncreaseThread("1235");
-		fs.SetTransferRate(trnsfSize);
-		fr.SetTransferRate(trnsfSize);
-		
-		//increasing channel for receiver (no port need to be added for receiver)->dfaults to 0
-		fr.IncreaseThread();
-
-		//setting sender's address and port
-		fr.SetSender(NetworkBuilder::GetDeviceIPs()[0], "1234");
-		//sending file via child thread
-		std::thread(&FileSender::StartTransfer,&fs).detach();
-		
-		//receiving file via main thread
-		fr.StartTransfer();
-		auto&[report,ftr] = *fs.GetTransferReport().begin();
-		auto& lst = fs.GetFileStatusList();
-		int Count = 0;
-		while (ftr.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+		std::string str;
+		int ch;
+		std::string port = "1024";
+		std::unique_ptr<FileSender> FS = nullptr;
+		std::unique_ptr<FileReceiver> FR = nullptr;
+		FileTransferer* FT = nullptr;
+		std::cout << "1.SEND\n2.RECEIVE\n";
+		std::cin >> ch;
+		if(ch == 1)
 		{
-			if (!lst.empty())
+			FS = std::make_unique<FileSender>(port);
+			while (ch != 5)
 			{
 				system("cls");
-				std::cout << lst.front().size << ":" << lst.front().transferred << "_>" << Count;
-				Count += 1;
+				std::cout << "1.ADD FILE\n"
+					<< "2.INCRESE CHANNELS\n"
+					<< "3.DECREASE CHANNELS\n"
+					<< "4.SET TRANSFER RATE\n"
+					<< "5.START TRANSFER\n";
+				std::cin >> ch;
+				switch (ch)
+				{
+				case 1:
+					std::cout << "ENTER FILEPATH:";
+					std::cin >> str;
+					FS->AddFile(str);
+					break;
+				case 2:
+					std::cout << "ENTER PORT:";
+					std::cin >> str;
+					FS->IncreaseThread(str);
+					break;
+				case 3:
+					FS->DecreaseThread();
+					break;
+				case 4:
+					std::cout << "ENTER BYTE COUNTS:";
+					std::cin >> ch;
+					FS->SetTransferRate(ch);
+					ch = 4;
+					break;
+				case 5:
+					std::cout << "WAITING FOR CONNECTION...";
+					FS->StartTransfer();
+					break;
+				}
 			}
-			if (Count > 99)
+			FT = FS.get();
+		}
+		else if (ch == 2)
+		{
+			std::string sender;
+			FR = std::make_unique<FileReceiver>();
+			while (ch != 5)
 			{
-				fr.StopTransfer();
+				system("cls");
+				std::cout << "1.SET SENDER\n"
+					<< "2.INCREASE CHANNELS\n"
+					<< "3.DECREASE CHANNELS\n"
+					<< "4.SET TRANSFER RATE\n"
+					<< "5.START TRANSFER\n";
+				std::cin >> ch;
+				switch (ch)
+				{
+				case 1:
+					std::cin >> sender;
+					FR->SetSender(sender, port);
+					break;
+				case 2:
+					FR->IncreaseThread();
+					break;
+				case 3:
+					FR->DecreaseThread();
+					break;
+				case 4:
+					std::cout << "ENTER BYTE COUNTS\n";
+					std::cin >> ch;
+					FR->SetTransferRate(ch);
+					ch = 4;
+					break;
+				case 5:
+					FR->StartTransfer();
+					break;
+				}
+			}
+			FT = FR.get();
+		}
+		if (FT != nullptr)
+		{
+			auto& rpt = FT->GetTransferReport();
+			auto& StatList = FT->GetFileStatusList();
+			bool Completed = false;
+			while (!Completed)
+			{
+				system("cls");
+				for (auto& [prt, ftr] : rpt)
+				{
+					if (ftr.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+					{
+						Completed = false;
+						break;
+					}
+					else
+					{
+						Completed = true;
+					}
+				}
+				for (auto& stats : StatList)
+				{
+					std::cout << stats.name << "\n" << stats.size << ":" << stats.transferred << "\n\n";
+				}
 			}
 		}
-		std::cin.get();
-		
+
 	}
 	catch (NetworkBuilder::Exception e)
 	{
@@ -58,5 +129,7 @@ int main()
 	{
 		std::cout << e.what();
 	}
+	std::cin.get();
+	std::cin.get();
 	return 0;
 }

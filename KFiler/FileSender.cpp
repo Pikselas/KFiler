@@ -71,6 +71,10 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 	{
 		//..
 	}
+	catch (std::exception e)
+	{
+		//..
+	}
 	USING_THREADS--;
 	return List;
 }
