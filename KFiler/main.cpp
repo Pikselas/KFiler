@@ -48,6 +48,11 @@ int main()
 					ch = 4;
 					break;
 				case 5:
+					std::cout << "TRY CONNECTING ONE OF THESE IPs:\n";
+					for (auto& ip : NetworkBuilder::GetDeviceIPs())
+					{
+						std::cout << ip << "\n";
+					}
 					std::cout << "WAITING FOR CONNECTION...";
 					FS->StartTransfer();
 					break;
