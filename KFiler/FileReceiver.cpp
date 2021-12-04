@@ -16,7 +16,7 @@ FileReceiver::IndxListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClie
 			std::string Name;
 			size_t FileSize = 0;
 			client->Send("YS");
-			while (client->IsConnected())
+			while (client->IsConnected() && ContinueTransfer)
 			{
 				auto Dt = client->Receive();
 				if (Dt)
@@ -36,7 +36,7 @@ FileReceiver::IndxListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClie
 			mtx.unlock();
 			std::ofstream FL(Name, std::ios::binary);
 			size_t RecvCount = 0;
-			while (client->IsConnected() && RecvCount < FileSize)
+			while (client->IsConnected() && RecvCount < FileSize && ContinueTransfer)
 			{
 				auto dt = client->Receive(TRANSFER_RATE);
 				if (dt)

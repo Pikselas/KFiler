@@ -44,8 +44,8 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 				List.emplace_back(FileStatusList.size() - 1);
 				mtx.unlock();
 				//wait for response
-				while (server->IsConnected() && !server->Receive().has_value());
-				while (server->IsConnected() && FL.good())
+				while (server->IsConnected() && !server->Receive().has_value() && ContinueTransfer);
+				while (server->IsConnected() && FL.good() && ContinueTransfer)
 				{
 					if (FileBufferSize != TRANSFER_RATE)
 					{

@@ -6,7 +6,7 @@ int main()
 {
 	try
 	{
-		auto trnsfSize = 100;
+		auto trnsfSize = 1;
 		//creating a sender 
 		FileSender fs("1234");
 		
@@ -33,12 +33,18 @@ int main()
 		fr.StartTransfer();
 		auto&[report,ftr] = *fs.GetTransferReport().begin();
 		auto& lst = fs.GetFileStatusList();
+		int Count = 0;
 		while (ftr.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
 		{
 			if (!lst.empty())
 			{
 				system("cls");
-				std::cout << lst.front().size << ":" << lst.front().transferred;
+				std::cout << lst.front().size << ":" << lst.front().transferred << "_>" << Count;
+				Count += 1;
+			}
+			if (Count > 99)
+			{
+				fr.StopTransfer();
 			}
 		}
 		std::cin.get();
