@@ -1,18 +1,19 @@
 # KFiler
 ## *`File Transfering`* with `Modern C++` and `winsock2`
 ### For `windows` only
-|CLASS|FUNCTION|DOES|
----|---|---
-|FileTransferer|GetPendings|returns pending files|
-||StartTransfer(pure virtual)|Not Implemented|
-||StopTransfer(pure virtual)|Not Implemented
-||GetMaxThreadCount|returns maximum threads will be used
-||GetUsingThreadCount|returns current working threads
-|FileSender<br/>(*Inherited from FileTransferer*)|FileSender|Takes a port , creates a network server <br/>and calls listen on it
-||~FileSender|Clears all active servers <br> disconnects and destroy the server
-### How To Build
-***
->Use Visual Studio 2022 or latest <br/>
->Open solution file <br/>
->Modify `main.cpp` how U want to using available functions<br/>
->Build in **release** mode and **`Run`**
+#### How To Use
+>Download Current version [v0.0.1_pre](https://github.com/Pikselas/KFiler/releases) exe file targets [VirtualVibe](https://github.com/Pikselas/KFiler/tree/VirtualVibe).<br>
+>Run it , Enter the index number (The row numbers written on the left side)<br>
+>**SEND** -> for sending file (ENTER 1) <br>
+> `ADD FILE` -> Adds a new file for sending<br>
+>**RECEIVE** -> for receiving<br>
+>  `SET SENDER` -> Set the sender of the file (ONE of the IP addresses showing)<br>
+>**DEAFULT** for both<br>
+>  `INCREASE CHANNELS` -> Increases the number of threads and sockets it will use (At least one should be added , defaults to NO THREAD)*REQUIRES A PORT NUMBER IN SENDING MODE*<br>
+>  `DECREASE CHANNELS` -> Decreases the number of threads and sockets<br>
+>  `START TRANSFER` -> Starts transferring<br>
+
+
+### **`NOTE`**
+>Both the devices should be connectd via `LAN` or `WIFI`
+>Connection should only be made using the private IP (`OWNED BY THE DEVICE`)
