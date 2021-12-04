@@ -9,13 +9,12 @@ private:
 	std::unique_ptr<NetworkClient> MAIN_CLIENT;
 private:
 	std::pair<std::string, std::string> Sender;
-	std::vector<std::shared_ptr<NetworkClient>> Clients;
 public:
 	std::vector<std::string> PORTS;
 public:
 	FileReceiver();
 private:
-	IndxListType ReceiveFile(std::shared_ptr<NetworkClient> client,const std::string& port);
+	IndxListType ReceiveFile(const std::string& port);
 public:
 	void IncreaseThread();
 	void DecreaseThread();

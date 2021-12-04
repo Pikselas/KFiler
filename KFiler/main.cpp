@@ -21,7 +21,7 @@ int main()
 			{
 				system("cls");
 				std::cout << "1.ADD FILE\n"
-					<< "2.INCRESE CHANNELS\n"
+					<< "2.INCREASE CHANNELS\n"
 					<< "3.DECREASE CHANNELS\n"
 					<< "4.SET TRANSFER RATE\n"
 					<< "5.START TRANSFER\n";

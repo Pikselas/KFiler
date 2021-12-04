@@ -4,12 +4,13 @@ FileReceiver::FileReceiver()
 	MAIN_CLIENT = std::make_unique<NetworkClient>();
 }
 
-FileReceiver::IndxListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClient> client ,const std::string& port)
+FileReceiver::IndxListType FileReceiver::ReceiveFile(const std::string& port)
 {
 	USING_THREADS++;
 	IndxListType List;
 	try
 	{
+		auto client = std::make_unique<NetworkClient>();
 		client->Connect(Sender.first, port);
 		while (client->IsConnected() && ContinueTransfer)
 		{
@@ -30,10 +31,11 @@ FileReceiver::IndxListType FileReceiver::ReceiveFile(std::shared_ptr<NetworkClie
 				}
 			}
 			client->Send("YS");
-			mtx.lock();
+			std::unique_lock ul(mtx);
 			FileStatusList.emplace_back(Name, FileSize, 0);
-			List.emplace_back(FileStatusList.size() - 1);
-			mtx.unlock();
+			auto stLsize = FileStatusList.size() - 1;
+			ul.unlock();
+			List.emplace_back(stLsize);
 			std::ofstream FL(Name, std::ios::binary);
 			size_t RecvCount = 0;
 			while (client->IsConnected() && RecvCount < FileSize && ContinueTransfer)
@@ -108,8 +110,7 @@ void FileReceiver::StartTransfer()
 		
 		for (auto& prt : PORTS)
 		{
-			Clients.emplace_back(std::make_shared<NetworkClient>());
-			std::packaged_task<IndxListType()> tsk(std::bind(&FileReceiver::ReceiveFile, this, Clients.back(),prt));
+			std::packaged_task<IndxListType()> tsk(std::bind(&FileReceiver::ReceiveFile, this,prt));
 			TransferReport.emplace(prt, tsk.get_future());
 			std::thread(std::move(tsk)).detach();
 		}

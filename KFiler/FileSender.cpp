@@ -31,18 +31,18 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 			//popping from pending files getting the actual filename and sending to receiver
 			if (!PendingFiles.empty())
 			{
-				mtx.lock();
+				std::unique_lock ul(mtx);
 				const auto FilePath = PendingFiles.front();
 				PendingFiles.pop();
-				mtx.unlock();
+				ul.unlock();
 				const auto fileName = ksTools::split_by_delms(FilePath, "/").back();
 				std::ifstream FL(FilePath, std::ios::binary);
 				const auto fileSize = GetFileSize(FL);
 				server->Send(fileName + ';' + std::to_string(fileSize));
-				mtx.lock();
+				ul.lock();
 				FileStatusList.emplace_back(fileName, fileSize, 0);
 				List.emplace_back(FileStatusList.size() - 1);
-				mtx.unlock();
+				ul.unlock();
 				//wait for response
 				while (server->IsConnected() && !server->Receive().has_value() && ContinueTransfer);
 				while (server->IsConnected() && FL.good() && ContinueTransfer)
