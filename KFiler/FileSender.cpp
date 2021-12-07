@@ -54,7 +54,7 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 					}
 					FL.read(FileBuffer.get(), FileBufferSize);
 					int ReadCount = (int)FL.gcount();
-					FileStatusList[List.back()].transferred += ReadCount;
+					FileStatusList.data()[List.back()].transferred += ReadCount;
 					//using overloaded function so that no data get losts
 					server->Send(FileBuffer.get(), ReadCount);
 				}

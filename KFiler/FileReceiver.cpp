@@ -45,7 +45,7 @@ FileReceiver::IndxListType FileReceiver::ReceiveFile(const std::string& port)
 				{
 					auto d = dt.value();
 					RecvCount += d.second;
-					FileStatusList[List.back()].transferred = RecvCount;
+					FileStatusList.data()[List.back()].transferred = RecvCount;
 					FL.write(d.first,d.second);					
 				}
 			}
