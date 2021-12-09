@@ -66,8 +66,6 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 				catch (const std::ifstream::failure& e)
 				{
 					//process here..
-					auto x = e.what();
-					std::cout << x;
 				}
 			}
 			else
