@@ -1,5 +1,4 @@
 #include"FileSender.h"
-#include<iostream>
 FileSender::FileSender(const std::string& Port)
 {
 	MAIN_SERVER = std::make_unique<NetworkServer>(Port);
