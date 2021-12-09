@@ -1,4 +1,5 @@
 #include"FileSender.h"
+#include<iostream>
 FileSender::FileSender(const std::string& Port)
 {
 	MAIN_SERVER = std::make_unique<NetworkServer>(Port);
@@ -18,11 +19,12 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 {
 	USING_THREADS++;
 	IndxListType List;
+	std::ifstream FL;
+	FL.exceptions(std::ifstream::badbit);
 	try
 	{
 		int FileBufferSize = TRANSFER_RATE;
 		auto FileBuffer = std::make_unique<char[]>(FileBufferSize);
-		server->Listen();
 		server->AcceptConnection();
 		while (server->IsConnected() && ContinueTransfer)
 		{
@@ -36,29 +38,38 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 				PendingFiles.pop();
 				ul.unlock();
 				const auto fileName = ksTools::split_by_delms(FilePath, "/").back();
-				std::ifstream FL(FilePath, std::ios::binary);
-				const auto fileSize = GetFileSize(FL);
-				server->Send(fileName + ';' + std::to_string(fileSize));
-				ul.lock();
-				FileStatusList.emplace_back(fileName, fileSize, 0);
-				List.emplace_back(FileStatusList.size() - 1);
-				ul.unlock();
-				//wait for response
-				while (server->IsConnected() && !server->Receive().has_value() && ContinueTransfer);
-				while (server->IsConnected() && FL.good() && ContinueTransfer)
+				try
 				{
-					if (FileBufferSize != TRANSFER_RATE)
+					FL.open(FilePath, std::ios::binary);
+					const auto fileSize = GetFileSize(FL);
+					server->Send(fileName + ';' + std::to_string(fileSize));
+					ul.lock();
+					FileStatusList.emplace_back(fileName, fileSize, 0);
+					List.emplace_back(FileStatusList.size() - 1);
+					ul.unlock();
+					//wait for response
+					while (server->IsConnected() && !server->Receive().has_value() && ContinueTransfer);
+					while (server->IsConnected() && FL.good() && ContinueTransfer)
 					{
-						FileBufferSize = TRANSFER_RATE;
-						FileBuffer = std::make_unique<char[]>(FileBufferSize);
+						if (FileBufferSize != TRANSFER_RATE)
+						{
+							FileBufferSize = TRANSFER_RATE;
+							FileBuffer = std::make_unique<char[]>(FileBufferSize);
+						}
+						FL.read(FileBuffer.get(), FileBufferSize);
+						int ReadCount = (int)FL.gcount();
+						FileStatusList.data()[List.back()].transferred += ReadCount;
+						//using overloaded function so that no data get losts
+						server->Send(FileBuffer.get(), ReadCount);
 					}
-					FL.read(FileBuffer.get(), FileBufferSize);
-					int ReadCount = (int)FL.gcount();
-					FileStatusList.data()[List.back()].transferred += ReadCount;
-					//using overloaded function so that no data get losts
-					server->Send(FileBuffer.get(), ReadCount);
+					FL.close();
 				}
-				FL.close();
+				catch (const std::ifstream::failure& e)
+				{
+					//process here..
+					auto x = e.what();
+					std::cout << x;
+				}
 			}
 			else
 			{
@@ -67,7 +78,7 @@ FileSender::IndxListType FileSender::SendFile(std::shared_ptr<NetworkServer> ser
 		}
 		server->DisConnect();
 	}
-	catch (NetworkBuilder::Exception e)
+	catch (const NetworkBuilder::Exception e)
 	{
 		//..
 	}
@@ -168,6 +179,7 @@ void FileSender::StartTransfer()
 				FileServers.emplace_back(std::make_shared<NetworkServer>(TmpPort));
 				UseablePorts.pop();
 				Itr = FileServers.end() - 1;
+				(*Itr)->Listen();
 			}
 			TmpDt += TmpPort;
 			if (i + 1 < ThreadsCanBeUsed)
